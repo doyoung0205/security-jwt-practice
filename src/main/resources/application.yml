@@ -1,0 +1,28 @@
+server:
+      port: 8080
+
+spring:
+  datasource:
+    # H2
+    url: jdbc:h2:tcp://localhost/~/test
+    driver-class-name: org.h2.Driver
+    username: sa
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties.hibernate.hbm2ddl.auto: create
+    show_sql: true
+  messages:
+    basename: i18n/exception
+    encoding: UTF-8
+  jwt:
+    secret: govlepel@$&
+
+#logging:
+#  level:
+#    ROOT: DEBUG
+#    com.codej99.doyoung.rest.apipractice: info
+#    org:
+#      hibernate: info
+#      springframework:
+#        web: info
+#        security: info
