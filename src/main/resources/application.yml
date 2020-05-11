@@ -17,10 +17,10 @@ spring:
   jwt:
     secret: govlepel@$&
 
-#logging:
-#  level:
+logging:
+  level:
 #    ROOT: DEBUG
-#    com.codej99.doyoung.rest.apipractice: info
+    com.codej99.doyoung.rest.apipractice: info
 #    org:
 #      hibernate: info
 #      springframework:

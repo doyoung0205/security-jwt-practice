@@ -29,10 +29,12 @@ dependencies {
 
 //    Swagger
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-    compile group: 'io.springfox', name: 'springfox-bean-validators', version: '2.9.2'
     compile("io.springfox:springfox-swagger2:2.9.2") {
         exclude module: 'swagger-annotations' exclude module: 'swagger-models'
     }
+
+    compile group: 'io.springfox', name: 'springfox-bean-validators', version: '2.9.2'
+
     compile("io.swagger:swagger-annotations:1.5.21")
     compile("io.swagger:swagger-models:1.5.21")
 
@@ -45,6 +47,10 @@ dependencies {
 
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'mysql:mysql-connector-java'
+
+//   Redis
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.2.5.RELEASE'
+
 
     implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
 

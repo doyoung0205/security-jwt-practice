@@ -27,7 +27,7 @@ import static springfox.documentation.builders.PathSelectors.regex;
 public class SwaggerConfiguration {
 
     public static final String AUTHORIZATION_HEADER = "X-AUTH-TOKEN";
-    public static final String DEFAULT_INCLUDE_PATTERN = "/v1/.*";
+    public static final String DEFAULT_INCLUDE_PATTERN = "/v1/.*"; // TODO security path 정의
 
     @Bean
     public Docket swaggerSpringfoxDocket() {
