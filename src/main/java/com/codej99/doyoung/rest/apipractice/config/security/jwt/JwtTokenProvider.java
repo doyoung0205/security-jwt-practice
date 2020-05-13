@@ -7,16 +7,18 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
 
 /*
  *  Jwt 토큰 생성 및 유효성 검증을 하는 컴포넌트 입니다. Jwt 는 여러가지 암호화 알고리즘을 제공하며 알고리즘 (SignatureAlgorithm.XXX)과 비밀키(secretKey)를 가지고 토큰을 생성하게 됩니다.
@@ -31,11 +33,18 @@ import java.util.*;
 @RequiredArgsConstructor
 @Component
 @Log
-public class JwtTokenProvider { // JWT 토큰을 생성 및 검증 모듈
+public class JwtTokenProvider {
+    public static final String CLAIMS_USER_KEY = "user";
     @Value("spring.jwt.secret")
     private String secretKey;
 
-    private final long tokenValidMilisecond = 1000L * 60 * 60; // 1시간만 토큰 유효
+    private final long accessTokenValidMilisecond = 1000L * 60 * 30; // 30분
+    private final long tokenValidMilisecond = 1000L * 60 * 60 * 24 * 14; // 2주
+
+    private final String ACCESS_TOKEN_KEY = "X-AUTH-TOKEN";
+    private final String REFRESH_TOKEN_KEY = "REFRESH-X-AUTH-TOKEN";
+
+
     private final UserDetailsService userDetailsService;
 
     @PostConstruct
@@ -43,7 +52,7 @@ public class JwtTokenProvider { // JWT 토큰을 생성 및 검증 모듈
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // Jwt 토큰 생성
+    // Jwt 토큰 생성 with userPk, roles
     public String createToken(String userPk, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(userPk);
         claims.put("roles", roles);
@@ -56,64 +65,138 @@ public class JwtTokenProvider { // JWT 토큰을 생성 및 검증 모듈
                 .compact();
     }
 
-    // Jwt 토큰으로 인증 정보를 조회
-    // DB 접근
-    public Authentication getAuthentication(String token) {
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    //Jwt 토큰 생성 with User
+    public String createToken(User user) {
+
+        Claims claims = Jwts.claims().setSubject(user.getUid());
+
+        claims.put("msrl", user.getMsrl());
+        claims.put("password", user.getPassword());
+        claims.put("roles", user.getRoles());
+        claims.put("name", user.getName());
+
+        Date now = new Date();
+        return Jwts.builder()
+                .setClaims(claims) // 데이터
+                .setIssuedAt(now) // 토큰 발행 일자
+                .setExpiration(new Date(now.getTime() + accessTokenValidMilisecond)) // set Expire Time
+                .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret 값 세팅
+                .compact();
     }
 
+    //Jwt 토큰 생성 with User and now
+    public String createToken(User user, LocalDateTime now, LocalDateTime expiresAt) {
+
+        Claims claims = Jwts.claims().setSubject(user.getUid());
+
+        claims.put("msrl", user.getMsrl());
+        claims.put("password", user.getPassword());
+        claims.put("roles", user.getRoles());
+        claims.put("name", user.getName());
+
+
+        return Jwts.builder()
+                .setClaims(claims) // 데이터
+                .setIssuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant())) // 토큰 발행 일자
+                .setExpiration(Date.from(expiresAt.atZone(ZoneId.systemDefault()).toInstant())) // set Expire Time
+                .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret 값 세팅
+                .compact();
+    }
+
+
+    // Jwt 토큰 생성 with User return JwtResponseDto
+    public JwtResponseDto save(User user) {
+
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime accessTokenExpiresAt = now.plusMinutes(30);
+        final LocalDateTime refreshTokenExpiresAt = now.plusWeeks(2);
+
+        // CREATE ACCESS_TOOKEN
+        final String accessToken = createToken(user, now, accessTokenExpiresAt);
+
+        // CREATE REFRESH_TOKEN
+        final String refreshToken = createToken(user, now, refreshTokenExpiresAt);
+
+        //  CREATE JwtResponseDto
+        return JwtResponseDto.builder()
+                .user(user)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    // Jwt 토큰으로 인증 정보를 조회
+    // DB 접근
+//    public Authentication getAuthentication(String token) {
+//        final UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
+//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+//    }
     //DB NO 접근
-//    public Authentication getAuthentication2(String token) {
-//        Map<String, Object> parseInfo = getUserParseInfo(token);
-//        log.info("parseinfo: " + parseInfo);
-//        final List<String> rs = (List) parseInfo.get("role");
-//        final String password = (String) parseInfo.get("password");
-//        final Long msrl = (Long) parseInfo.get("msrl");
-//        User.builder()
-//                .msrl(msrl)
-//                .uid(String.valueOf(parseInfo.get("username")))
-//                .password(password)
-//                .name("name")
-//                .roles(rs)
-//                .build()
-//
-//
-//        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-//                userDetails, null, userDetails.getAuthorities());
-//        return usernamePasswordAuthenticationToken;
-//    }
-//
-//    private Map<String, Object> getUserParseInfo(String token) {
-//
-//        return null;
-//    }
+    public Authentication getAuthentication(String token) {
+
+        final User user = getUserParseToken(token);
+
+        //  =============== 로그 확인 =============
+        log.info("============== JwtTokenProvider.getAuthentication ==============");
+        log.info("user ::: " + user);
+        log.info("==================================================================");
+
+        assert user != null : "user must not be blank";
+
+        return new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities());
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    }
+
+    private User getUserParseToken(final String token) {
+
+        final Claims claims = getClaimsFromToken(token);
+        final String uid = claims.getSubject();
+        final Long msrl = claims.get("msrl", Long.class);
+        final String password = claims.get("password", String.class);
+        final List<String> roles = claims.get("roles", List.class);
+        final String name = claims.get("name", String.class);
+
+        final User user = User.builder()
+                .roles(roles)
+                .msrl(msrl)
+                .password(password)
+                .name(name)
+                .build();
+
+        log.info("uid :::" + uid);
+        log.info("user ::: " + user);
+
+        return user;
+    }
 
 
     // Jwt 토큰에서 회원 구별 정보 추출
     public String getUserPk(String token) {
-        final Claims c = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        final Claims c = getClaimsFromToken(token);
         log.info("c.getSubject() :::" + c.getSubject());
-        log.info("c.get(\"roles\", List.class)) :::" + c.get("roles", List.class));
         return c.getSubject();
     }
 
 
     // Request 의 Header 에서 token 파싱 : "X-AUTH-TOKEN: jwt 토큰"
     public String resolveToken(HttpServletRequest req) {
-        return req.getHeader("X-AUTH-TOKEN");
+        return req.getHeader(ACCESS_TOKEN_KEY);
     }
 
     // Jwt 토큰의 유효성 + 만료 일자 확인
-    public boolean validateToken(String jwtToken) {
+    public boolean validateToken(String token) {
         try {
-            final Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+            final Claims claims = getClaimsFromToken(token);
 
 //            if (null != redisTemplate.opsForValue().get(Constant.REDIS_PREFIX + jwtToken)) {
 //                log.info("이미 로그아웃 처리된 사용자");
 //                return false;
 //            }
-            return !claims.getBody().getExpiration().before(new Date());
+            return !claims.getExpiration().before(new Date());
         } catch (ExpiredJwtException eje) {
             //JWT 를 생성할 때 지정한 유효 기간 초과할 때.
             log.info("JWT 유효 기간 초과");

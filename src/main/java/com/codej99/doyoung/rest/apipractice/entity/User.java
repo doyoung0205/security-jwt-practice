@@ -1,10 +1,9 @@
 package com.codej99.doyoung.rest.apipractice.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.GeneratorType;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor // 인자없는 생성자를 자동으로 생성합니다.
 @AllArgsConstructor // 인자를 모두 갖춘 생성자를 자동으로 생성합니다.
 @Table(name = "user") // 'user' 테이블과 매핑됨을 명시
+@ToString
 public class User implements UserDetails {
 
     @Id // pk
@@ -40,6 +41,7 @@ public class User implements UserDetails {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
+    @Getter
     private List<String> roles = new ArrayList<>();
 
     @Override
