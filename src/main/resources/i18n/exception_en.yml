@@ -1,4 +1,5 @@
 # exception_en.yml
+# common
 unKnown:
   code: "-9999"
   msg: "An unknown error has occurred."
@@ -11,6 +12,33 @@ emailSigninFailed:
 entryPointException:
   code: "-1002"
   msg: "You do not have permission to access this resource."
-accessDenied:
+cUserSingout:
   code: "-1003"
-  msg: "A resource that can not be accessed with the privileges it has."
+  msg: "already sing out"
+# JWT
+jwt:
+  expired:
+    code: "-2001"
+    msg: "this JWT expired"
+  acessTokenExpired:
+    code: "-2002"
+    msg: "this access Token JWT expired"
+  refreshTokenExpired:
+    code: "-2003"
+    msg: "this refresh Token JWT expired"
+  unsupported:
+    code: "-2004"
+    msg: "JWT bad format"
+  malformed:
+    code: "-2005"
+    msg: "JWT bad configuration"
+  signature:
+    code: "-2006"
+    msg: "No signature verification"
+  illegalArgument:
+    code: "-2007"
+    msg: "JWT IllegalArgumentException"
+  jwtRuntime:
+    code: "-2008"
+    msg: "JWT runtime Exception"
+

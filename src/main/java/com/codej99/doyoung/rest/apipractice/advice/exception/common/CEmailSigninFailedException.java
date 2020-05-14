@@ -1,4 +1,4 @@
-package com.codej99.doyoung.rest.apipractice.advice.exception;
+package com.codej99.doyoung.rest.apipractice.advice.exception.common;
 
 public class CEmailSigninFailedException extends RuntimeException {
     public CEmailSigninFailedException(String msg, Throwable t) {

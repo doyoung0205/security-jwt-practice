@@ -1,6 +1,6 @@
 package com.codej99.doyoung.rest.apipractice.controller.v1;
 
-import com.codej99.doyoung.rest.apipractice.advice.exception.CUserNotFoundException;
+import com.codej99.doyoung.rest.apipractice.advice.exception.common.CUserNotFoundException;
 import com.codej99.doyoung.rest.apipractice.entity.User;
 import com.codej99.doyoung.rest.apipractice.model.response.CommonResult;
 import com.codej99.doyoung.rest.apipractice.model.response.ListResult;

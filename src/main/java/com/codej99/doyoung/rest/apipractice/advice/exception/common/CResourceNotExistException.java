@@ -1,4 +1,4 @@
-package com.codej99.doyoung.rest.apipractice.advice.exception;
+package com.codej99.doyoung.rest.apipractice.advice.exception.common;
 
 public class CResourceNotExistException extends RuntimeException {
     public CResourceNotExistException(String msg, Throwable t) {

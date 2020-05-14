@@ -1,6 +1,6 @@
 package com.codej99.doyoung.rest.apipractice.controller.exception;
 
-import com.codej99.doyoung.rest.apipractice.advice.exception.CAuthenticationEntryPointException;
+import com.codej99.doyoung.rest.apipractice.advice.exception.common.CAuthenticationEntryPointException;
 import com.codej99.doyoung.rest.apipractice.model.response.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;

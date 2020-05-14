@@ -1,6 +1,6 @@
 package com.codej99.doyoung.rest.apipractice.config.security.service;
 
-import com.codej99.doyoung.rest.apipractice.advice.exception.CUserNotFoundException;
+import com.codej99.doyoung.rest.apipractice.advice.exception.common.CUserNotFoundException;
 import com.codej99.doyoung.rest.apipractice.repo.UserJpaRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
