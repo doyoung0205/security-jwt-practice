@@ -42,4 +42,8 @@ jwt:
   jwtRuntime:
     code: "-2008"
     msg: "JWT 검증 중, 알 수 없는 오류가 발생 했습니다."
+  notFoundRefreshTokenInRedis:
+    code: "-2009"
+    msg: "레디스에서 리프레시 토큰을 검증하는데 오류가 발생 했습니다."
+
 

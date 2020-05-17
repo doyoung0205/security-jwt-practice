@@ -90,6 +90,14 @@ public class JwtExceptionAdvice {
         return responseService.getFailResult(Integer.parseInt(getMessage("jwt.jwtRuntime.code")), getMessage("jwt.jwtRuntime.msg"));
     }
 
+    // 생
+    @ExceptionHandler(NotFoundRefreshTokenInRedis.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected CommonResult notFoundRefreshTokenInRedis(HttpServletRequest request, Exception e) {
+        log.info("NotFoundRefreshTokenInRedis" + e.getMessage());
+        return responseService.getFailResult(Integer.parseInt(getMessage("jwt.notFoundRefreshTokenInRedis.code")), getMessage("jwt.notFoundRefreshTokenInRedis.msg"));
+    }
+
     // code 정보에 해당하는 메시지를 조회합니다.
     private String getMessage(String code) {
         return getMessage(code, null);

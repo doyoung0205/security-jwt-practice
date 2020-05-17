@@ -2,8 +2,10 @@ package com.codej99.doyoung.rest.apipractice.controller.v1;
 
 
 import com.codej99.doyoung.rest.apipractice.advice.exception.common.CEmailSigninFailedException;
-import com.codej99.doyoung.rest.apipractice.config.security.jwt.JwtResponseDto;
-import com.codej99.doyoung.rest.apipractice.config.security.jwt.JwtTokenProvider;
+import com.codej99.doyoung.rest.apipractice.config.security.jwt.application.JwtTokenService;
+import com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.model.JwtResponseDto;
+import com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.model.JwtTokenType;
+import com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.model.JwtTokenUtil;
 import com.codej99.doyoung.rest.apipractice.entity.User;
 import com.codej99.doyoung.rest.apipractice.model.response.CommonResult;
 import com.codej99.doyoung.rest.apipractice.model.response.SingleResult;
@@ -23,9 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.Collections;
 
-import static com.codej99.doyoung.rest.apipractice.config.security.jwt.SecurityConstants.ROLE_USER;
+import static com.codej99.doyoung.rest.apipractice.config.security.SecurityConfigConstants.ROLE_USER;
 
 @Api(tags = {"1. Sign"})
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ import static com.codej99.doyoung.rest.apipractice.config.security.jwt.SecurityC
 public class SignController {
 
     private final UserJpaRepo userJpaRepo;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenService jwtTokenService;
     private final ResponseService responseService;
     private final PasswordEncoder passwordEncoder;
 
@@ -65,28 +68,30 @@ public class SignController {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new CEmailSigninFailedException();
         }
-        return responseService.getSingleResult(jwtTokenProvider.save(user));
+        return responseService.getSingleResult(jwtTokenService.initialize(user));
     }
 
     @ApiOperation(value = "JWT ACCESS TOKEN 갱신", notes = "이메일 회원 아이디로 JWT 토큰 갱신을 한다.")
     @PostMapping(path = "/signin/refresh")
-    public SingleResult<JwtResponseDto> requestForNewAccessToken(
+    public SingleResult<String> requestForNewAccessToken(
             HttpServletRequest request,
-            @ApiParam(value = "회원ID : 이메일", required = true) @RequestParam final String id
-    ) {
+            @ApiParam(value = "회원ID : 이메일", required = true) @RequestParam final String id) {
         // parameter check
-        final String accessToken = jwtTokenProvider.resolveAccessToken(request);
-        assert accessToken != null : "accessToken must not be blank";
+        final String accessToken = JwtTokenUtil.getRequestAcessToken(request);
 
-        final String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
+        final String refreshToken = JwtTokenUtil.getRequestRefreshToken(request);
         assert refreshToken != null : "refreshToken must not be blank";
 
         // accessToken, refreshToken validation
-        jwtTokenProvider.validateUpdateAccessToken(accessToken, refreshToken, id);
+        jwtTokenService.validateUpdateAccessToken(accessToken, refreshToken, id);
 
-        // create new accessToken
-        responseService.getSingleResult(jwtTokenProvider.updateAccessToken(accessToken));
-        return null;
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime accessTokenExpiresAt = JwtTokenUtil.getAccessTokenExpiresAt(now);
+
+        // update accessToken
+        log.info("updateAccessToken");
+        return responseService.getSingleResult(jwtTokenService.updateToken(accessToken, accessTokenExpiresAt));
+
     }
 
 

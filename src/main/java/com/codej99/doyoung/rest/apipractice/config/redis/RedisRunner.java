@@ -20,8 +20,8 @@ public class RedisRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        stringRedisRun();
-        jpaRepoRedisRun();
+//        stringRedisRun();
+//        jpaRepoRedisRun();
     }
 
     private void jpaRepoRedisRun() {
@@ -39,5 +39,9 @@ public class RedisRunner implements ApplicationRunner {
         values.set("junseo", "max9160");
         values.set("hello", "world");
         values.set("dog", "terry");
+
+//        final String refreshTokenByRedis = redisTemplate.opsForValue().get("asdf");
+//
+//        log.info("refreshTokenByRedis ::: " + refreshTokenByRedis);
     }
 }

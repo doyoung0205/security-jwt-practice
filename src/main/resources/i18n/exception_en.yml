@@ -41,4 +41,7 @@ jwt:
   jwtRuntime:
     code: "-2008"
     msg: "JWT runtime Exception"
-
+  notFoundRefreshTokenInRedis:
+    code: "-2009"
+    msg: "An error occurred while validating the refresh token in the Redis.
+"
