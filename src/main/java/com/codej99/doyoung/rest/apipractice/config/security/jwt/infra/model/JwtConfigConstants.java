@@ -1,4 +1,4 @@
-package com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.domain;
+package com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.model;
 
 public class JwtConfigConstants {
 
@@ -12,5 +12,6 @@ public class JwtConfigConstants {
     public static final String REDIS_SIGNOUT_PREFIX = "SIGN_OUT_";
 
     public static final String TOKEN_TYPE = "bearer";
+    public static final String ACCESS_TOKEN_PREFIX = "Bearer ";
 
 }

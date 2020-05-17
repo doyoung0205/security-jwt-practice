@@ -1,4 +1,4 @@
-package com.codej99.doyoung.rest.apipractice.config.security.jwt.domain;
+package com.codej99.doyoung.rest.apipractice.config.security.jwt.infra.model;
 
 import com.codej99.doyoung.rest.apipractice.entity.User;
 import lombok.Builder;
